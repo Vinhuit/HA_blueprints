@@ -950,7 +950,7 @@ triggers:
     id: frigate-event
   - platform: mqtt
     topic: "frigate/tracked_object_update"
-    value_template: "{{value_json['description']}}"  
+    value_template: "{{value_json['type'] == 'description'}}"  
     id: frigate-genai
   - trigger: event
     event_type: mobile_app_notification_action
@@ -976,7 +976,7 @@ variables:
   input_camera: !input camera
   input_camera_name: "{{input_camera|expand|map(attribute='attributes.camera_name', default='none')|list}}"
   camera: "{{trigger.payload_json['after']['camera'] if trigger.id == 'frigate-event'}}"
-  genai_description: "{{ trigger.payload_json if trigger.id == 'frigate-genai' }}"
+  genai_description: "{{trigger.payload_json['description']}}"
   camera_name: "{{ camera | replace('_', ' ') | title }}"
   input_severity: !input review_severity
   severity: "{{trigger.payload_json['after']['severity'] if trigger.id == 'frigate-event'}}"
