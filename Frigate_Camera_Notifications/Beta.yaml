@@ -950,7 +950,7 @@ triggers:
     id: frigate-event
   - platform: mqtt
     topic: "frigate/tracked_object_update"
-    value_template: "{{ value_json }}"  
+    value_template: "{{value_json['type'] == 'description'}}"  
     id: frigate-genai
   - trigger: event
     event_type: mobile_app_notification_action
@@ -1039,7 +1039,7 @@ variables:
   before_zones: "{{ trigger.payload_json['before']['data']['zones'] | list | lower if trigger.id == 'frigate-event' }}"
   after_zones: "{{ trigger.payload_json['after']['data']['zones'] | list | lower if trigger.id == 'frigate-event' }}"
   zone_multi_filter: "{{zone_only and zone_multi and after_zones|length and zones and zones |reject('in', after_zones) |list |length == 0 }}"
-  genai_description: "{{ trigger.payload_json['description'] | default('No AI description available') if trigger.id == 'frigate-genai' }}"
+  genai_description: "{{ trigger.payload_json['description'] if trigger.id == 'frigate-genai' }}"
 conditions:
   condition: or
   conditions:
