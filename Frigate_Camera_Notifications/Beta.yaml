@@ -123,6 +123,8 @@ blueprint:
           selector:
             select:
               options:
+                - label: "Default: Get from genai"
+                  value: "{{ genai_description }}."
                 - label: "Default:   e.g., A Person was detected on the Side camera."
                   value: "A {{ label }} {{ 'was detected' }} on the {{ camera_name }} camera."
                 - label: "Short:     e.g., Person detected - Side"
@@ -946,6 +948,10 @@ triggers:
     payload: "new"
     value_template: "{{value_json['type']}}"
     id: frigate-event
+  - platform: mqtt
+    topic: "frigate/tracked_object_update"
+    value_template: "{{ value_json }}"  
+    id: frigate-genai
   - trigger: event
     event_type: mobile_app_notification_action
     event_data:
@@ -1033,6 +1039,7 @@ variables:
   before_zones: "{{ trigger.payload_json['before']['data']['zones'] | list | lower if trigger.id == 'frigate-event' }}"
   after_zones: "{{ trigger.payload_json['after']['data']['zones'] | list | lower if trigger.id == 'frigate-event' }}"
   zone_multi_filter: "{{zone_only and zone_multi and after_zones|length and zones and zones |reject('in', after_zones) |list |length == 0 }}"
+  genai_description: "{{ trigger.payload_json['description'] | default('No AI description available') if trigger.id == 'frigate-genai' }}"
 conditions:
   condition: or
   conditions:
