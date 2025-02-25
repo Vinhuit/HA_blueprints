@@ -124,7 +124,7 @@ blueprint:
             select:
               options:
                 - label: "Default: Get from genai"
-                  value: "{{ genai_description }}."
+                  value: "{{ genai_description }}.{{ genai_camera }}"
                 - label: "Default:   e.g., A Person was detected on the Side camera."
                   value: "A {{ label }} {{ 'was detected' }} on the {{ camera_name }} camera."
                 - label: "Short:     e.g., Person detected - Side"
@@ -976,7 +976,8 @@ variables:
   input_camera: !input camera
   input_camera_name: "{{input_camera|expand|map(attribute='attributes.camera_name', default='none')|list}}"
   camera: "{{trigger.payload_json['after']['camera'] if trigger.id == 'frigate-event'}}"
-  genai_description: "{{trigger.payload_json['description']}}"
+  genai_description: "{{ trigger.payload_json['description'] if trigger.id == 'frigate-genai' }}"
+  genai_camera: "{{trigger.payload_json['after']['camera'] if trigger.id == 'frigate-event'}}"
   camera_name: "{{ camera | replace('_', ' ') | title }}"
   input_severity: !input review_severity
   severity: "{{trigger.payload_json['after']['severity'] if trigger.id == 'frigate-event'}}"
