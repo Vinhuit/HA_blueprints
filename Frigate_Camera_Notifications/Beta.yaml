@@ -1035,7 +1035,7 @@ variables:
   before_zones: "{{ trigger.payload_json['before']['data']['zones'] | list | lower if trigger.id == 'frigate-event' }}"
   after_zones: "{{ trigger.payload_json['after']['data']['zones'] | list | lower if trigger.id == 'frigate-event' }}"
   zone_multi_filter: "{{zone_only and zone_multi and after_zones|length and zones and zones |reject('in', after_zones) |list |length == 0 }}"
-  event_id: "{{ trigger.payload_json['after']['id'] }}"
+  event_id: "{{ trigger.payload_json['after']['id'] if trigger.id == 'frigate-event' }}"
   
 conditions:
   condition: or
@@ -1097,7 +1097,8 @@ actions:
         sequence:
           - variables:
               event: "{{ trigger.payload_json }}"
-              genai_description: "{{ wait.trigger.payload_json['description'] }}"
+              genai: "{{ wait.trigger.payload_json }}"
+              genai_description: "{{ genai['description'] }}"
               detections: "{{ event['after']['data']['detections'] }}"
               review_id: "{{event['after']['id']}}"
               id: "{{ detections[0] }}"
@@ -1195,7 +1196,9 @@ actions:
                             Frigate Review id: {{review_id}}{{', Frigate client ID: ' + client_id if client_id else ''}}, 
                             Frigate Detections: {{detections}}
                             Objects: {{label}},
-                            Sub Labels: {{sub_labels | join(', ')}}
+                            Sub Labels: {{sub_labels | join(', ')}},
+                            GenAI: {{genai}}
+                            GenAI_description: {{genai_description}}
                           Config: 
                             Camera(formatted): {{camera}}({{camera_name}}), 
                             Base URL: {{'REDACTED' if base_url and redacted else base_url}},
