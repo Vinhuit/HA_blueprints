@@ -1094,7 +1094,7 @@ actions:
           - variables:
               event: "{{ trigger.payload_json }}"
               genai: "{{genai_camera}}"
-              genai_description: {{genai_camera}}
+              genai_description: "{{genai_camera}}"
               detections: "{{ event['after']['data']['detections'] }}"
               review_id: "{{event['after']['id']}}"
               id: "{{ detections[0] }}"
