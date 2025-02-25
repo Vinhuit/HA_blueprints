@@ -1,5 +1,5 @@
 blueprint:
-  name: Frigate Notifications (0.14.0.3f)
+  name: Frigate Notifications (0.2)
   author: SgtBatten
   homeassistant:
     min_version: 2024.11.0
