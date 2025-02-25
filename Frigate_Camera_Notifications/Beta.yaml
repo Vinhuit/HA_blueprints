@@ -1059,16 +1059,7 @@ conditions:
         - alias: Disable Times
           condition: template
           value_template: "{{ not disable_times|length or not now().hour in disable_times|map('int')|list }}"
-actions:
-  - wait_for_trigger:
-    - topic: frigate/tracked_object_update
-      value_template: "{{ value_json['type'] == 'description' and value_json['id']
-        == event_id }}"
-      variables:
-        event_id: '{{ event_id }}'
-      trigger: mqtt
-    timeout: '15'
-    continue_on_timeout: true
+actions:  
   - choose:
       - alias: "Silence New Object Notifications"
         conditions:
@@ -1097,8 +1088,8 @@ actions:
         sequence:
           - variables:
               event: "{{ trigger.payload_json }}"
-              genai: "{{ wait.trigger.payload_json }}"
-              genai_description: "{{ genai['description'] }}"
+              genai: "Init Ai"
+              genai_description: "Init Ai Des}}"
               detections: "{{ event['after']['data']['detections'] }}"
               review_id: "{{event['after']['id']}}"
               id: "{{ detections[0] }}"
@@ -1508,6 +1499,13 @@ actions:
                       topic: "{{mqtt_topic}}"
                       payload: "{{ review_id }}"
                       value_template: "{{ value_json['after']['id'] }}"
+                    - trigger: mqtt
+                      topic: frigate/tracked_object_update
+                      value_template: "{{ value_json['type'] == 'description' and value_json['id']
+                        == event_id }}"
+                      variables:
+                        event_id: '{{ event_id }}'
+                      
                   timeout:
                     minutes: "{{timeout}}"
                   continue_on_timeout: false
@@ -1515,9 +1513,10 @@ actions:
                     # use the subsequent attchment variable if set
                     attachment_2: !input attachment_2
                     attachment: "{{iif(attachment_2, attachment_2, attachment)}}"
-
-                    event: "{{ wait.trigger.payload_json }}"
-                    type: "{{event['type']}}"
+                    genai: "{{ wait.trigger.payload_json if 'description' in wait.trigger.payload_json}}"
+                    genai_description: "{{ genai['description'] }}"
+                    event: "{{ wait.trigger.payload_json if 'after' in wait.trigger.payload_json }}"
+                    type: "{{event['type'] if 'after' in wait.trigger.payload_json }}"
 
                     initial_severity: "{{severity}}"
                     old_objects: "{{objects}}"
@@ -1630,6 +1629,8 @@ actions:
                               DEBUG (in loop):
                                 Send Notification: {{custom_filter and not home and zones_satisfied and state_satisfied and objects_satisfied and severity_satisfied and ((final_update and type == 'end') or (severity_updated or presence_changed or zone_updated or object_updated or sub_label_updated)) }}
                                 Info:
+                                  GenAI: {{genai}}
+                                  GenAI_description: {{genai_description}}
                                   Sub Label: {{sub_labels}},
                                   Image: "{{attachment if not redacted or not base_url else attachment |replace(base_url, 'REDACTED')}}"
                                   Title: {{title}}
