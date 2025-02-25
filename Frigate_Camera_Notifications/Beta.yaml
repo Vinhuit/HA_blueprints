@@ -947,7 +947,11 @@ triggers:
     topic: "{{mqtt_topic}}"
     payload: "new"
     value_template: "{{value_json['type']}}"
-    id: frigate-event 
+    id: frigate-event
+  - trigger: mqtt
+    topic: "frigate/tracked_object_update"
+    value_template: "{{value_json}}"
+    id: frigate-genai   
   - trigger: event
     event_type: mobile_app_notification_action
     event_data:
@@ -972,6 +976,7 @@ variables:
   input_camera: !input camera
   input_camera_name: "{{input_camera|expand|map(attribute='attributes.camera_name', default='none')|list}}"
   camera: "{{trigger.payload_json['after']['camera'] if trigger.id == 'frigate-event'}}"
+  genai: "{{trigger.payload_json['description'] if trigger.id == 'frigate-genai'}}"
   camera_name: "{{ camera | replace('_', ' ') | title }}"
   input_severity: !input review_severity
   severity: "{{trigger.payload_json['after']['severity'] if trigger.id == 'frigate-event'}}"
@@ -1088,7 +1093,7 @@ actions:
         sequence:
           - variables:
               event: "{{ trigger.payload_json }}"
-              genai: "Init Ai"
+              genai: "{{description}}"
               genai_description: "Init Ai Des"
               detections: "{{ event['after']['data']['detections'] }}"
               review_id: "{{event['after']['id']}}"
@@ -1501,8 +1506,7 @@ actions:
                       value_template: "{{ value_json['after']['id'] }}"
                     - trigger: mqtt
                       topic: frigate/tracked_object_update
-                      value_template: "{{ value_json['type'] == 'description' and value_json['id']
-                        == event_id }}"
+                      value_template: "{{ value_json }}"
                       variables:
                         event_id: '{{ event_id }}'
                       
@@ -1511,12 +1515,13 @@ actions:
                   continue_on_timeout: false
                 - variables:
                     # use the subsequent attchment variable if set
+                    topic: "{{mqtt_topic}}"
                     attachment_2: !input attachment_2
                     attachment: "{{iif(attachment_2, attachment_2, attachment)}}"
-                    genai: "{{ wait.trigger.payload_json if 'description' in wait.trigger.payload_json}}"
-                    genai_description: "{{ genai['description'] }}"
-                    event: "{{ wait.trigger.payload_json if 'after' in wait.trigger.payload_json }}"
-                    type: "{{event['type'] if 'after' in event }}"
+                    genai: "{{ wait.trigger.payload_json if wait.trigger.topic == 'frigate/tracked_object_update' }}"
+                    genai_description: "{{ genai['description'] if wait.trigger.topic == 'frigate/tracked_object_update' }}"
+                    event: "{{ wait.trigger.payload_json if  wait.trigger.topic == topic }}"
+                    type: "{{event['type'] if  wait.trigger.topic == topic }}"
 
                     initial_severity: "{{severity}}"
                     old_objects: "{{objects}}"
