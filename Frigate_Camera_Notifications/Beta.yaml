@@ -1089,7 +1089,7 @@ actions:
           - variables:
               event: "{{ trigger.payload_json }}"
               genai: "Init Ai"
-              genai_description: "Init Ai Des}}"
+              genai_description: "Init Ai Des"
               detections: "{{ event['after']['data']['detections'] }}"
               review_id: "{{event['after']['id']}}"
               id: "{{ detections[0] }}"
@@ -1516,7 +1516,7 @@ actions:
                     genai: "{{ wait.trigger.payload_json if 'description' in wait.trigger.payload_json}}"
                     genai_description: "{{ genai['description'] }}"
                     event: "{{ wait.trigger.payload_json if 'after' in wait.trigger.payload_json }}"
-                    type: "{{event['type'] if 'after' in wait.trigger.payload_json }}"
+                    type: "{{event['type'] if 'after' in event }}"
 
                     initial_severity: "{{severity}}"
                     old_objects: "{{objects}}"
