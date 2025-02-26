@@ -950,7 +950,6 @@ triggers:
     id: frigate-event
   - trigger: mqtt
     topic: "frigate/tracked_object_update"
-    value_template: "{{value_json}}"
     id: frigate-genai   
   - trigger: event
     event_type: mobile_app_notification_action
@@ -1506,10 +1505,6 @@ actions:
                       value_template: "{{ value_json['after']['id'] }}"
                     - trigger: mqtt
                       topic: frigate/tracked_object_update
-                      value_template: "{{ value_json }}"
-                      variables:
-                        event_id: '{{ event_id }}'
-                      
                   timeout:
                     minutes: "{{timeout}}"
                   continue_on_timeout: false
