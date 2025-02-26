@@ -1052,10 +1052,9 @@ conditions:
       id: custom
     - condition: and
       conditions:
-        - condition: trigger
-          id: frigate-event
-        - condition: trigger
-          id: frigate-genai  
+        - alias: Camera topic
+          condition: template
+          value_template: "{{ trigger.topic == 'frigate/reviews' or trigger.topic == 'frigate/tracked_object_update' }}"  
         - alias: Camera Match
           condition: template
           value_template: "{{ input_camera_name|select('equalto', camera)|list|length>0 }}"
@@ -1094,10 +1093,18 @@ actions:
           - condition: trigger
             id: "frigate-event"
         sequence:
+          - wait_for_trigger:             
+              - trigger: mqtt
+                topic: frigate/tracked_object_update
+                payload: "description"
+                value_template: "{{ value_json['type'] }}"
+            timeout:
+              minutes: "{{timeout}}"
+            continue_on_timeout: false
           - variables:
               event: "{{ trigger.payload_json }}"
-              genai: "{{genai_camera}}"
-              genai_description: "{{genai_camera}}"
+              genai: "{{wait.trigger.payload_json}}"
+              genai_description: "{{genai['description']}}"
               detections: "{{ event['after']['data']['detections'] }}"
               review_id: "{{event['after']['id']}}"
               id: "{{ detections[0] }}"
