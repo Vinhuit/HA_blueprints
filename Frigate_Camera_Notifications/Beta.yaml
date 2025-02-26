@@ -944,12 +944,14 @@ trigger_variables:
   mqtt_topic: !input mqtt_topic
 triggers:
   - trigger: mqtt
-    topic: "{{mqtt_topic}}"
+    topic: "{{ mqtt_topic }}"
     payload: "new"
-    value_template: "{{value_json['type']}}"
+    value_template: "{{ value_json['type'] }}"
     id: frigate-event
   - trigger: mqtt
-    topic: "frigate/tracked_object_update"
+    topic: frigate/tracked_object_update
+    payload: "description"
+    value_template: "{{ value_json['type'] }}"
     id: frigate-genai   
   - trigger: event
     event_type: mobile_app_notification_action
