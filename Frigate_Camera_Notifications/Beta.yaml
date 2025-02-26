@@ -1054,6 +1054,8 @@ conditions:
       conditions:
         - condition: trigger
           id: frigate-event
+        - condition: trigger
+          id: frigate-genai  
         - alias: Camera Match
           condition: template
           value_template: "{{ input_camera_name|select('equalto', camera)|list|length>0 }}"
